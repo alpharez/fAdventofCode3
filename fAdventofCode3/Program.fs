@@ -609,11 +609,11 @@ let dataset2 =
       "U818"
       "L182" ]
 
-let testDataset1 = ["R75"; "D30"; "R83"; "U83"; "L12"; "D49"; "R71"; "U7"; "L72"]
-let testDataset2 = ["U62"; "R66"; "U55"; "R34"; "D71"; "R55"; "D58"; "R83"]
+let testDataset3 = ["R75"; "D30"; "R83"; "U83"; "L12"; "D49"; "R71"; "U7"; "L72"]
+let testDataset4 = ["U62"; "R66"; "U55"; "R34"; "D71"; "R55"; "D58"; "R83"]
 
-let testDataset3 = ["R98"; "U47"; "R26"; "D63"; "R33"; "U87"; "L62"; "D20"; "R33"; "U53"; "R51"]
-let testDataset4 = ["U98"; "R91"; "D20"; "R16"; "D67"; "R40"; "U7"; "R15"; "U6"; "R7"]
+let testDataset1 = ["R98"; "U47"; "R26"; "D63"; "R33"; "U87"; "L62"; "D20"; "R33"; "U53"; "R51"]
+let testDataset2 = ["U98"; "R91"; "D20"; "R16"; "D67"; "R40"; "U7"; "R15"; "U6"; "R7"]
 
 // each line starts at 0,0
 // make a list of points from each line
@@ -630,78 +630,76 @@ type Point =
     { x : int
       y : int }
 
+let manhattanDistance p1 p2 = abs(p1.x - p2.x) + abs(p1.y - p2.y)
+
 let centralPort = { x = 0; y = 0 }  // constant origin point
 let mutable pen = { x = 0; y = 0 }  // this is the pen starting point at origin 0,0
-
-// Left is go <--- along X axis, Y stays the same
+let mutable shortestDistance = 99999999
 
 let mutable pointList1 = []
 let mutable pointList2 = []
 
-for line1 in testDataset1 do
-    let num = (line1.[1 .. ] |> int)  // change number part to integer
+for line1 in dataset1 do
+    let num = (line1.[1 .. ] |> int) - 1  // change number part to integer
     match line1.[0] with
-    | 'L' -> for i in num .. pen.x do 
-        let p = { x = i; y = pen.y }
+    | 'L' -> for i in 0 .. num  do 
+        let p = { x = pen.x-1; y = pen.y }
         pointList1 <- p :: pointList1
         pen <- p  // p is the new pen location
-    | 'R' -> for i in pen.x .. num do 
-        let p = { x = i; y = pen.y }
+    | 'R' -> for i in 0 .. num  do 
+        let p = { x = pen.x+1; y = pen.y }
         pointList1 <- p :: pointList1
         pen <- p  // p is the new pen location
-    | 'U' -> for i in pen.y .. num do 
-        let p = { x = pen.x; y = i }
+    | 'U' -> for i in 0 .. num  do 
+        let p = { x = pen.x; y = pen.y-1 }
         pointList1 <- p :: pointList1
         pen <- p  // p is the new pen location
-    | 'D' -> for i in num .. pen.y do 
-        let p = { x = pen.x; y = i }
+    | 'D' -> for i in 0 .. num  do 
+        let p = { x = pen.x; y = pen.y+1 }
         pointList1 <- p :: pointList1
         pen <- p  // p is the new pen location
     | _ -> ()
-    //let Lpointlist = [ for i = (line1.[1 .. ] |> int) downto 0 do i ]
-    //let Rpointlist = [ for i = 0 to (line1.[1 .. ] |> int) do i ]
+
 printfn "point list 1 end "
 // get direction and number, convert to list of Points
 
 pen <- { x = 0; y = 0 }   // reset pen
 
-for line2 in testDataset2 do
-    let num = (line2.[1 .. ] |> int)  // change number part to integer
+for line2 in dataset2 do
+    let num = (line2.[1 .. ] |> int) - 1 // change number part to integer
     match line2.[0] with
-    | 'L' -> for i in num .. pen.x do 
-        let p = { x = i; y = pen.y }
+    | 'L' -> for i in 0 .. num do 
+        let p = { x = pen.x-1; y = pen.y }
         pointList2 <- p :: pointList2
-        pen <- p  // p is the new pen location
-    | 'R' -> for i in pen.x .. num do 
-        let p = { x = i; y = pen.y }
+        pen <- p 
+    | 'R' -> for i in 0 .. num do 
+        let p = { x = pen.x+1; y = pen.y }
         pointList2 <- p :: pointList2
-        pen <- p  // p is the new pen location
-    | 'U' -> for i in num .. pen.y do 
-        let p = { x = pen.x; y = i }
+        pen <- p 
+    | 'U' -> for i in 0 .. num do 
+        let p = { x = pen.x; y = pen.y-1 }
         pointList2 <- p :: pointList2
-        pen <- p  // p is the new pen location
-    | 'D' -> for i in pen.y .. num do 
-        let p = { x = pen.x; y = i }
+        pen <- p 
+    | 'D' -> for i in 0 .. num do 
+        let p = { x = pen.x; y = pen.y+1 }
         pointList2 <- p :: pointList2
-        pen <- p  // p is the new pen location
+        pen <- p 
     | _ -> ()
-    //let Lpointlist = [ for i = (line1.[1 .. ] |> int) downto 0 do i ]
-    //let Rpointlist = [ for i = 0 to (line1.[1 .. ] |> int) do i ]
+
 printfn "dataset 2 pen location %A" pen // pointList2.[pointList2.Length - 1]
 // get direction and number, convert to list of Points
 
-(*
+
 for pl1 in pointList1 do
     for pl2 in pointList2 do
         if pl1 = pl2 then
-            printfn ":: Common Point :: %A %A" pl1 pl2
-            *)
+            let distance = manhattanDistance pl1 centralPort
+            if distance < shortestDistance then 
+                shortestDistance <- distance
+            printfn ":: Common Point :: %A %A distance %A" pl1 pl2 distance
+            
 
-printfn "Point List 1 " 
-for p in pointList1 do
-    printf " %A " p
-//printfn "Point List 2 %A" pointList2
-
+printfn "SHORTEST DISTANCE : %A" shortestDistance
 
 [<EntryPoint>]
 let main argv =
